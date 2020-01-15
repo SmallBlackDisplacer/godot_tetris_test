@@ -1,15 +1,19 @@
 extends Node2D
 
-#var x= 10
-#var y = 0
-
 var state = 0
-var fig_t = [[10,0],[9,1],[10,1],[11,1]]
-var fig_t_rot = [[[0,-1],[-1,0],[0,0],[1,0]],[[1,0],[0,-1],[0,0],[0,1]],[[0,1],[1,0],[0,0],[-1,0]],[[-1,0],[0,1],[0,0],[0,-1]]]
+var start_position = [10,1]
+#var fig_types = ['T','I','O','J','L','S','Z']
+var fig_types = ['T','I','O']
+
+var current_fig = fig_types[randi() % 3]
+
+#var fig_t = [[10,0],[9,1],[10,1],[11,1]]
+#var fig_t_rot = [[[0,-1],[-1,0],[0,0],[1,0]],[[1,0],[0,-1],[0,0],[0,1]],[[0,1],[1,0],[0,0],[-1,0]],[[-1,0],[0,1],[0,0],[0,-1]]]
+
 
 var figs = {
 	'T':{
-		'start_pos':[[10,0],[9,1],[10,1],[11,1]],
+		'color':0,
 		'relat_pos':[[[0,-1],[-1,0],[0,0],[1,0]],
 			[[1,0],[0,-1],[0,0],[0,1]],
 			[[0,1],[1,0],[0,0],[-1,0]],
@@ -17,7 +21,7 @@ var figs = {
 		]
 	},
 	'I':{
-		'start_pos':[[10,0],[10,1],[10,2],[10,3]],
+		'color':1,
 		'relat_pos':[[[0,-2],[0,-1],[0,0],[0,1]],
 			[[2,0],[1,0],[0,0],[-1,0]],
 			[[0,2],[0,1],[0,0],[0,-1]],
@@ -25,7 +29,7 @@ var figs = {
 		]
 	},
 	'O':{
-		'start_pos':[[10,0],[11,0],[10,1],[11,1]],
+		'color':2,
 		'relat_pos':[[[0,-1],[1,-1],[0,0],[1,0]],
 			[[1,0],[1,1],[0,0],[0,1]],
 			[[0,1],[-1,1],[0,0],[-1,0]],
@@ -34,60 +38,31 @@ var figs = {
 	},
 	'J':{
 		'start_pos':[[11,0],[9,1],[10,1],[11,1]],
+		'color':3,
 		'relat_pos':[]
 	},
 	'L':{
 		'start_pos':[[9,0],[9,1],[10,1],[11,1]],
+		'color':4,
 		'relat_pos':[]
 	},
 	'S':{
 		'start_pos':[[10,0],[11,0],[10,1],[9,1]],
+		'color':5,
 		'relat_pos':[]
 	},
 	'Z':{
 		'start_pos':[[9,0],[10,0],[10,1],[11,1]],
+		'color':6,
 		'relat_pos':[]
 	}
 }
 
-func top_fig (fig):
-	var top_el_y = 20
-	var top_el_x
-	for tile in fig:
-		if tile[1] < top_el_y:
-			top_el_y = tile[1]
-			top_el_x = tile[0]
-	return [top_el_x, top_el_y]
-
-func bot_fig (fig):
-	var bot_el_y = 0
-	var bot_el_x
-	for tile in fig:
-		if tile[1] > bot_el_y:
-			bot_el_y = tile[1]
-			bot_el_x = tile[0]
-	return [bot_el_x, bot_el_y]
-
-func left_fig (fig):
-	var left_el_x = 20
-	var left_el_y
-	for tile in fig:
-		if tile[0] < left_el_x:
-			left_el_x = tile[0]
-			left_el_y = tile[1]
-	return [left_el_x, left_el_y]
-
-func right_fig (fig):
-	var right_el_x = 0
-	var right_el_y
-	for tile in fig:
-		if tile[0] > right_el_x:
-			right_el_x = tile[0]
-			right_el_y = tile[1]
-	return [right_el_x, right_el_y]
-
-func borders_fig (fig):
-	return {'top':top_fig(fig),'bot':bot_fig(fig),'left':left_fig(fig),'right':right_fig(fig)}
+var fig_t = [[start_position[0]+figs[current_fig]['relat_pos'][state][0][0],start_position[1]+figs[current_fig]['relat_pos'][state][0][1]],
+	[start_position[0]+figs[current_fig]['relat_pos'][state][1][0],start_position[1]+figs[current_fig]['relat_pos'][state][1][1]],
+	[start_position[0]+figs[current_fig]['relat_pos'][state][2][0],start_position[1]+figs[current_fig]['relat_pos'][state][2][1]],
+	[start_position[0]+figs[current_fig]['relat_pos'][state][3][0],start_position[1]+figs[current_fig]['relat_pos'][state][3][1]],
+	]
 
 func column(fig, n):
 	var result = []
@@ -95,14 +70,14 @@ func column(fig, n):
 		result.append(el[n])
 	return result
 
-func collision_fig (fig,x,y,tile_t):
+func collision_fig (fig,x,y):
 	var safe_x = column(fig,0)
 	var safe_y = column(fig,1)
 	var result = false
 	for tile in fig:
 		if tile[0]+x in safe_x and tile[1]+y in safe_y:
 			continue
-		if $TileMap.get_cell(tile[0]+x,tile[1]+y) == tile_t:
+		if $TileMap.get_cell(tile[0]+x,tile[1]+y) != -1:
 			result = true
 	return result
 
@@ -129,7 +104,7 @@ func clean_rows ():
 	for row in range(1,19):
 		var expire = true
 		for col in range(1,19):
-			if $TileMap.get_cell(col,row) != 0:
+			if $TileMap.get_cell(col,row) == -1:
 				expire = false
 		if expire:
 			for rev_row in range(row,1,-1):
@@ -137,32 +112,35 @@ func clean_rows ():
 					$TileMap.set_cell(col,rev_row,$TileMap.get_cell(col,rev_row-1))
 
 func _ready():
-	draw_fig(fig_t,0)
+	draw_fig(fig_t,figs[current_fig]['color'])
 	$Timer.connect("timeout", self, "_on_Timer_timeout")
 
 func _process(delta):
-	var borders = borders_fig(fig_t)
-	if borders['bot'][1] < 19:
-		if Input.is_action_just_pressed("ui_left") and borders['left'][0] > 1 and not collision_fig(fig_t,-1,0,0):
-			draw_fig(fig_t,-1)
-			slide_fig(fig_t, -1, 0)
-			draw_fig(fig_t,0)
-		if Input.is_action_just_pressed("ui_right") and borders['right'][0] < 18 and not collision_fig(fig_t,1,0,0):
-			draw_fig(fig_t,-1)
-			slide_fig(fig_t, 1, 0)
-			draw_fig(fig_t,0)
-		if Input.is_action_just_pressed("ui_up"):
-			draw_fig(fig_t,-1)
-			state = rotate_fig(fig_t, state, fig_t_rot)
-			draw_fig(fig_t,0)
+	if Input.is_action_just_pressed("ui_left") and not collision_fig(fig_t,-1,0):
+		draw_fig(fig_t,-1)
+		slide_fig(fig_t, -1, 0)
+		draw_fig(fig_t,figs[current_fig]['color'])
+	if Input.is_action_just_pressed("ui_right") and not collision_fig(fig_t,1,0):
+		draw_fig(fig_t,-1)
+		slide_fig(fig_t, 1, 0)
+		draw_fig(fig_t,figs[current_fig]['color'])
+	if Input.is_action_just_pressed("ui_up"):
+		draw_fig(fig_t,-1)
+		state = rotate_fig(fig_t, state, figs[current_fig]['relat_pos'])
+		draw_fig(fig_t,figs[current_fig]['color'])
 
 func _on_Timer_timeout():
-	var borders = borders_fig(fig_t)
-	if borders['bot'][1] < 18 and not collision_fig(fig_t,0,1,0):
+	if not collision_fig(fig_t,0,1):
 		draw_fig(fig_t,-1)
 		slide_fig(fig_t, 0, 1)
-		draw_fig(fig_t,0)
+		draw_fig(fig_t,figs[current_fig]['color'])
 	else:
 		clean_rows ()
-		fig_t = [[10,0],[9,1],[10,1],[11,1]]
-		draw_fig(fig_t,0)
+		state = 0
+		current_fig = fig_types[randi() % 3]
+		fig_t = [[start_position[0]+figs[current_fig]['relat_pos'][state][0][0],start_position[1]+figs[current_fig]['relat_pos'][state][0][1]],
+			[start_position[0]+figs[current_fig]['relat_pos'][state][1][0],start_position[1]+figs[current_fig]['relat_pos'][state][1][1]],
+			[start_position[0]+figs[current_fig]['relat_pos'][state][2][0],start_position[1]+figs[current_fig]['relat_pos'][state][2][1]],
+			[start_position[0]+figs[current_fig]['relat_pos'][state][3][0],start_position[1]+figs[current_fig]['relat_pos'][state][3][1]],
+			]
+		draw_fig(fig_t,figs[current_fig]['color'])
