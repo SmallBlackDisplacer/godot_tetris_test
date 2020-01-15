@@ -1,8 +1,9 @@
 extends Node2D
 
 var state = 0
-var start_position = [10,1]
+var start_position = [5,1]
 var fig_types = ['T','I','O','J','L','S','Z']
+var MAP_WIDTH = 19
 
 var current_fig = fig_types[randi() % 7]
 
@@ -109,14 +110,14 @@ func rotate_fig (fig, state, fig_rot):
 	return state
 
 func clean_rows ():
-	for row in range(1,19):
+	for row in range(1,MAP_WIDTH):
 		var expire = true
-		for col in range(1,19):
+		for col in range(1,MAP_WIDTH):
 			if $TileMap.get_cell(col,row) == -1:
 				expire = false
 		if expire:
 			for rev_row in range(row,1,-1):
-				for col in range(1,19):
+				for col in range(1,MAP_WIDTH):
 					$TileMap.set_cell(col,rev_row,$TileMap.get_cell(col,rev_row-1))
 
 func _ready():
