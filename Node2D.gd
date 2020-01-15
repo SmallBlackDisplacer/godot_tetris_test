@@ -73,18 +73,10 @@ var fig_t = [[start_position[0]+figs[current_fig]['relat_pos'][state][0][0],star
 	[start_position[0]+figs[current_fig]['relat_pos'][state][3][0],start_position[1]+figs[current_fig]['relat_pos'][state][3][1]],
 	]
 
-func column(fig, n):
-	var result = []
-	for el in fig:
-		result.append(el[n])
-	return result
-
 func collision_fig (fig,x,y):
-	var safe_x = column(fig,0)
-	var safe_y = column(fig,1)
 	var result = false
 	for tile in fig:
-		if tile[0]+x in safe_x and tile[1]+y in safe_y:
+		if [tile[0]+x,tile[1]+y] in fig:
 			continue
 		if $TileMap.get_cell(tile[0]+x,tile[1]+y) != -1:
 			result = true
@@ -121,6 +113,7 @@ func clean_rows ():
 					$TileMap.set_cell(col,rev_row,$TileMap.get_cell(col,rev_row-1))
 
 func _ready():
+	randomize()
 	draw_fig(fig_t,figs[current_fig]['color'])
 	$Timer.connect("timeout", self, "_on_Timer_timeout")
 
