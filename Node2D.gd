@@ -3,7 +3,52 @@ extends Node2D
 #var x= 10
 #var y = 0
 
+var state = 0
 var fig_t = [[10,0],[9,1],[10,1],[11,1]]
+var fig_t_rot = [[[0,-1],[-1,0],[0,0],[1,0]],[[1,0],[0,-1],[0,0],[0,1]],[[0,1],[1,0],[0,0],[-1,0]],[[-1,0],[0,1],[0,0],[0,-1]]]
+
+var figs = {
+	'T':{
+		'start_pos':[[10,0],[9,1],[10,1],[11,1]],
+		'relat_pos':[[[0,-1],[-1,0],[0,0],[1,0]],
+			[[1,0],[0,-1],[0,0],[0,1]],
+			[[0,1],[1,0],[0,0],[-1,0]],
+			[[-1,0],[0,1],[0,0],[0,-1]]
+		]
+	},
+	'I':{
+		'start_pos':[[10,0],[10,1],[10,2],[10,3]],
+		'relat_pos':[[[0,-2],[0,-1],[0,0],[0,1]],
+			[[2,0],[1,0],[0,0],[-1,0]],
+			[[0,2],[0,1],[0,0],[0,-1]],
+			[[-2,0],[-1,0],[0,0],[1,0]]
+		]
+	},
+	'O':{
+		'start_pos':[[10,0],[11,0],[10,1],[11,1]],
+		'relat_pos':[[[0,-1],[1,-1],[0,0],[1,0]],
+			[[1,0],[1,1],[0,0],[0,1]],
+			[[0,1],[-1,1],[0,0],[-1,0]],
+			[[-1,0],[-1,-1],[0,0],[0,-1]]
+		]
+	},
+	'J':{
+		'start_pos':[[11,0],[9,1],[10,1],[11,1]],
+		'relat_pos':[]
+	},
+	'L':{
+		'start_pos':[[9,0],[9,1],[10,1],[11,1]],
+		'relat_pos':[]
+	},
+	'S':{
+		'start_pos':[[10,0],[11,0],[10,1],[9,1]],
+		'relat_pos':[]
+	},
+	'Z':{
+		'start_pos':[[9,0],[10,0],[10,1],[11,1]],
+		'relat_pos':[]
+	}
+}
 
 func top_fig (fig):
 	var top_el_y = 20
@@ -70,10 +115,26 @@ func slide_fig (fig, x, y):
 		tile[0] += x
 		tile[1] += y
 
-func rotate_fig (fig, type, direction):
-	if type == 'T':
-		pass
-	return fig
+func rotate_fig (fig, state, fig_rot):
+	if state == 3:
+		state = 0
+	else:
+		state += 1
+	for i in range(len(fig)):
+		fig[i][0] = fig[2][0] + fig_rot[state][i][0]
+		fig[i][1] = fig[2][1] + fig_rot[state][i][1]
+	return state
+
+func clean_rows ():
+	for row in range(20):
+		var expire = true
+		for col in range(20):
+			if $TileMap.get_cell(col,row) != 0:
+				expire = false
+		if expire:
+			for rev_row in range(row,1,-1):
+				for col in range(20):
+					$TileMap.set_cell(col,rev_row,$TileMap.get_cell(col,rev_row-1))
 
 func _ready():
 	draw_fig(fig_t,0)
@@ -90,6 +151,10 @@ func _process(delta):
 			draw_fig(fig_t,-1)
 			slide_fig(fig_t, 1, 0)
 			draw_fig(fig_t,0)
+		if Input.is_action_just_pressed("ui_up"):
+			draw_fig(fig_t,-1)
+			state = rotate_fig(fig_t, state, fig_t_rot)
+			draw_fig(fig_t,0)
 
 func _on_Timer_timeout():
 	var borders = borders_fig(fig_t)
@@ -98,5 +163,6 @@ func _on_Timer_timeout():
 		slide_fig(fig_t, 0, 1)
 		draw_fig(fig_t,0)
 	else:
+		clean_rows ()
 		fig_t = [[10,0],[9,1],[10,1],[11,1]]
 		draw_fig(fig_t,0)
