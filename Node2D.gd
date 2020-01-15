@@ -2,14 +2,9 @@ extends Node2D
 
 var state = 0
 var start_position = [10,1]
-#var fig_types = ['T','I','O','J','L','S','Z']
-var fig_types = ['T','I','O']
+var fig_types = ['T','I','O','J','L','S','Z']
 
-var current_fig = fig_types[randi() % 3]
-
-#var fig_t = [[10,0],[9,1],[10,1],[11,1]]
-#var fig_t_rot = [[[0,-1],[-1,0],[0,0],[1,0]],[[1,0],[0,-1],[0,0],[0,1]],[[0,1],[1,0],[0,0],[-1,0]],[[-1,0],[0,1],[0,0],[0,-1]]]
-
+var current_fig = fig_types[randi() % 7]
 
 var figs = {
 	'T':{
@@ -37,24 +32,37 @@ var figs = {
 		]
 	},
 	'J':{
-		'start_pos':[[11,0],[9,1],[10,1],[11,1]],
 		'color':3,
-		'relat_pos':[]
+		'relat_pos':[[[1,-1],[-1,0],[0,0],[1,0]],
+			[[1,1],[0,-1],[0,0],[0,1]],
+			[[-1,1],[1,0],[0,0],[-1,0]],
+			[[-1,-1],[0,1],[0,0],[0,-1]]
+		]
 	},
 	'L':{
-		'start_pos':[[9,0],[9,1],[10,1],[11,1]],
 		'color':4,
-		'relat_pos':[]
+		'relat_pos':[[[-1,-1],[-1,0],[0,0],[1,0]],
+			[[1,-1],[0,-1],[0,0],[0,1]],
+			[[1,1],[1,0],[0,0],[-1,0]],
+			[[-1,1],[0,1],[0,0],[0,-1]]
+		]
 	},
 	'S':{
-		'start_pos':[[10,0],[11,0],[10,1],[9,1]],
 		'color':5,
-		'relat_pos':[]
+		'relat_pos':[[[0,-1],[1,-1],[0,0],[-1,0]],
+			[[1,0],[1,1],[0,0],[0,-1]],
+			[[0,1],[-1,1],[0,0],[1,0]],
+			[[-1,0],[-1,-1],[0,0],[0,1]]
+		]
 	},
 	'Z':{
 		'start_pos':[[9,0],[10,0],[10,1],[11,1]],
 		'color':6,
-		'relat_pos':[]
+		'relat_pos':[[[-1,-1],[0,-1],[0,0],[1,0]],
+			[[1,-1],[1,0],[0,0],[0,1]],
+			[[1,1],[0,1],[0,0],[-1,0]],
+			[[-1,1],[-1,0],[0,0],[0,-1]]
+		]
 	}
 }
 
@@ -137,7 +145,7 @@ func _on_Timer_timeout():
 	else:
 		clean_rows ()
 		state = 0
-		current_fig = fig_types[randi() % 3]
+		current_fig = fig_types[randi() % 7]
 		fig_t = [[start_position[0]+figs[current_fig]['relat_pos'][state][0][0],start_position[1]+figs[current_fig]['relat_pos'][state][0][1]],
 			[start_position[0]+figs[current_fig]['relat_pos'][state][1][0],start_position[1]+figs[current_fig]['relat_pos'][state][1][1]],
 			[start_position[0]+figs[current_fig]['relat_pos'][state][2][0],start_position[1]+figs[current_fig]['relat_pos'][state][2][1]],
