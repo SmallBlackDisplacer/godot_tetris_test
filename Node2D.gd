@@ -126,14 +126,14 @@ func rotate_fig (fig, state, fig_rot):
 	return state
 
 func clean_rows ():
-	for row in range(20):
+	for row in range(1,19):
 		var expire = true
-		for col in range(20):
+		for col in range(1,19):
 			if $TileMap.get_cell(col,row) != 0:
 				expire = false
 		if expire:
 			for rev_row in range(row,1,-1):
-				for col in range(20):
+				for col in range(1,19):
 					$TileMap.set_cell(col,rev_row,$TileMap.get_cell(col,rev_row-1))
 
 func _ready():
@@ -143,11 +143,11 @@ func _ready():
 func _process(delta):
 	var borders = borders_fig(fig_t)
 	if borders['bot'][1] < 19:
-		if Input.is_action_just_pressed("ui_left") and borders['left'][0] > 0 and not collision_fig(fig_t,-1,0,0):
+		if Input.is_action_just_pressed("ui_left") and borders['left'][0] > 1 and not collision_fig(fig_t,-1,0,0):
 			draw_fig(fig_t,-1)
 			slide_fig(fig_t, -1, 0)
 			draw_fig(fig_t,0)
-		if Input.is_action_just_pressed("ui_right") and borders['right'][0] < 19 and not collision_fig(fig_t,1,0,0):
+		if Input.is_action_just_pressed("ui_right") and borders['right'][0] < 18 and not collision_fig(fig_t,1,0,0):
 			draw_fig(fig_t,-1)
 			slide_fig(fig_t, 1, 0)
 			draw_fig(fig_t,0)
@@ -158,7 +158,7 @@ func _process(delta):
 
 func _on_Timer_timeout():
 	var borders = borders_fig(fig_t)
-	if borders['bot'][1] < 19 and not collision_fig(fig_t,0,1,0):
+	if borders['bot'][1] < 18 and not collision_fig(fig_t,0,1,0):
 		draw_fig(fig_t,-1)
 		slide_fig(fig_t, 0, 1)
 		draw_fig(fig_t,0)
